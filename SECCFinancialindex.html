@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SECC — Financial Overview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --navy: #1a2f4a; --navy-deep: #0f1e30;
+    --gold: #b8973a; --gold-light: #d4b060; --gold-pale: #f5edda;
+    --cream: #faf8f4; --stone: #e8e4dc;
+    --text: #1a1a1a; --text-muted: #6b6560; --text-light: #9b9590;
+    --danger: #9b2c2c; --danger-bg: #fff5f5;
+    --warn: #92400e; --warn-bg: #fffbeb;
+    --ok: #1a5c3a; --ok-bg: #f0fdf4;
+    --rule: rgba(26,47,74,0.1); --radius: 4px;
+  }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--text); font-size: 15px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+
+  /* ── MASTHEAD ── */
+  .masthead { background: var(--navy-deep); color: white; padding: 3.5rem 2rem 3rem; text-align: center; position: relative; overflow: hidden; }
+  .masthead::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 80% 60% at 20% 120%, rgba(184,151,58,0.12) 0%, transparent 60%), radial-gradient(ellipse 60% 40% at 80% -10%, rgba(184,151,58,0.08) 0%, transparent 60%); pointer-events: none; }
+  .cross { display: inline-block; color: var(--gold); font-size: 1.2rem; margin-bottom: 1rem; letter-spacing: 0.2em; }
+  .masthead h1 { font-family: 'Playfair Display', serif; font-size: clamp(1.6rem, 4vw, 2.6rem); font-weight: 600; color: white; margin-bottom: 0.4rem; }
+  .masthead-sub { font-size: 0.85rem; color: rgba(255,255,255,0.5); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 2rem; }
+  .masthead-meta { display: inline-flex; gap: 2rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1.5rem; flex-wrap: wrap; justify-content: center; }
+  .meta-item { text-align: center; }
+  .meta-item .val { display: block; font-size: 1.5rem; font-weight: 500; color: var(--gold-light); font-family: 'DM Mono', monospace; line-height: 1.2; }
+  .meta-item .lbl { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(255,255,255,0.4); margin-top: 0.2rem; }
+
+  /* ── NAV ── */
+  nav { position: sticky; top: 0; z-index: 100; background: white; border-bottom: 1px solid var(--rule); padding: 0 2rem; display: flex; overflow-x: auto; }
+  nav a { display: inline-block; padding: 1rem 1.2rem; font-size: 0.8rem; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-muted); text-decoration: none; white-space: nowrap; border-bottom: 2px solid transparent; transition: color 0.15s, border-color 0.15s; }
+  nav a:hover, nav a.active { color: var(--navy); border-bottom-color: var(--gold); }
+
+  /* ── LAYOUT ── */
+  .container { max-width: 1000px; margin: 0 auto; padding: 0 1.5rem; }
+  section { padding: 3rem 0; border-bottom: 1px solid var(--rule); }
+  section:last-child { border-bottom: none; }
+  .section-eyebrow { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--gold); font-weight: 500; margin-bottom: 0.5rem; }
+  .section-title { font-family: 'Playfair Display', serif; font-size: clamp(1.3rem, 3vw, 1.9rem); font-weight: 600; color: var(--navy); margin-bottom: 0.6rem; line-height: 1.2; }
+  .section-lead { font-size: 0.95rem; color: var(--text-muted); max-width: 640px; line-height: 1.7; margin-bottom: 2rem; }
+
+  /* ── CALLOUTS ── */
+  .callout-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 2rem; }
+  .callout { background: white; border: 1px solid var(--rule); border-radius: var(--radius); padding: 1.25rem 1.5rem; position: relative; }
+  .callout::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; border-radius: var(--radius) var(--radius) 0 0; }
+  .callout.navy::before { background: var(--navy); }
+  .callout.gold::before { background: var(--gold); }
+  .callout.danger::before { background: var(--danger); }
+  .callout-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-light); margin-bottom: 0.4rem; font-weight: 500; }
+  .callout-value { font-family: 'DM Mono', monospace; font-size: 1.6rem; font-weight: 400; color: var(--navy); line-height: 1.1; }
+  .callout-value.red { color: var(--danger); }
+  .callout-value.gold-c { color: var(--gold); }
+  .callout-note { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.4rem; line-height: 1.4; }
+
+  /* ── ALERTS ── */
+  .alert { padding: 1rem 1.25rem; border-radius: var(--radius); font-size: 0.88rem; margin-bottom: 1.25rem; display: flex; gap: 0.75rem; align-items: flex-start; line-height: 1.6; }
+  .alert.warn { background: var(--warn-bg); border: 1px solid rgba(146,64,14,0.2); color: var(--warn); }
+  .alert.ok   { background: var(--ok-bg);   border: 1px solid rgba(26,92,58,0.2);  color: var(--ok); }
+  .alert-icon { font-size: 1rem; flex-shrink: 0; margin-top: 0.05rem; }
+  .alert strong { font-weight: 500; }
+
+  /* ── BUDGET BLOCKS ── */
+  .budget-block { background: white; border: 1px solid var(--rule); border-radius: var(--radius); overflow: hidden; margin-bottom: 1rem; }
+
+  /* Clickable header */
+  .budget-header {
+    background: var(--navy); color: white;
+    padding: 0.8rem 1.25rem;
+    font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 500;
+    display: flex; justify-content: space-between; align-items: center;
+    cursor: pointer; user-select: none;
+    transition: background 0.15s;
+  }
+  .budget-header:hover { background: #243f60; }
+  .budget-header .hd-left { display: flex; align-items: center; gap: 0.6rem; }
+  .budget-header .total { font-family: 'DM Mono', monospace; font-size: 0.9rem; }
+  .budget-header .chevron { font-size: 0.7rem; transition: transform 0.25s; opacity: 0.7; flex-shrink: 0; }
+  .budget-header.open .chevron { transform: rotate(180deg); }
+
+  /* Accent colors for different category headers */
+  .budget-header.revenue  { background: #1d3d2a; }
+  .budget-header.revenue:hover  { background: #254e36; }
+  .budget-header.labor    { background: #1a2f4a; }
+  .budget-header.labor:hover    { background: #243f60; }
+  .budget-header.ag       { background: #2d2040; }
+  .budget-header.ag:hover       { background: #3a2a52; }
+  .budget-header.facility { background: #3d2a0e; }
+  .budget-header.facility:hover { background: #4e3612; }
+  .budget-header.ops      { background: #1a1f2e; }
+  .budget-header.ops:hover      { background: #242a3e; }
+
+  /* Collapsible body */
+  .budget-body { overflow: hidden; max-height: 0; transition: max-height 0.3s ease; }
+  .budget-body.open { max-height: 1000px; }
+
+  .budget-row { display: flex; justify-content: space-between; align-items: center; padding: 0.65rem 1.25rem; border-bottom: 1px solid var(--stone); font-size: 0.88rem; }
+  .budget-row:last-child { border-bottom: none; }
+  .budget-row.net { background: #fff5f5; font-weight: 500; color: var(--danger); font-size: 0.95rem; }
+  .budget-row .amount { font-family: 'DM Mono', monospace; font-size: 0.9rem; white-space: nowrap; margin-left: 1rem; }
+  .budget-row .bar-cell { flex: 1; padding: 0 1rem; display: flex; align-items: center; }
+  .mini-bar { height: 5px; border-radius: 3px; background: var(--stone); flex: 1; overflow: hidden; }
+  .mini-bar-fill { height: 100%; border-radius: 3px; }
+  .pct-label { font-size: 0.7rem; color: var(--text-light); margin-left: 8px; white-space: nowrap; min-width: 32px; text-align: right; }
+
+  /* Net row at bottom — not a block */
+  .net-row { background: white; border: 1px solid rgba(155,44,44,0.25); border-radius: var(--radius); padding: 0.85rem 1.25rem; display: flex; justify-content: space-between; align-items: center; margin-top: 0.25rem; font-size: 0.95rem; font-weight: 500; color: var(--danger); }
+  .net-row .amount { font-family: 'DM Mono', monospace; }
+
+  /* ── CHARTS ── */
+  .chart-wrap { background: white; border: 1px solid var(--rule); border-radius: var(--radius); padding: 1.5rem; margin-bottom: 1.5rem; }
+  .chart-title { font-size: 0.8rem; font-weight: 500; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; }
+  .chart-canvas-wrap { position: relative; width: 100%; }
+
+  /* ── BREAKEVEN TABLE ── */
+  .be-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; background: white; border: 1px solid var(--rule); border-radius: var(--radius); overflow: hidden; }
+  .be-table th { background: var(--navy); color: white; padding: 0.7rem 1rem; text-align: left; font-size: 0.75rem; letter-spacing: 0.06em; text-transform: uppercase; font-weight: 500; }
+  .be-table th:not(:first-child) { text-align: right; }
+  .be-table td { padding: 0.65rem 1rem; border-bottom: 1px solid var(--stone); vertical-align: middle; }
+  .be-table tr:last-child td { border-bottom: none; }
+  .be-table td:not(:first-child) { text-align: right; font-family: 'DM Mono', monospace; font-size: 0.87rem; }
+  .be-table tr.current { background: #fffbf0; }
+  .be-table tr.breakeven-row { background: var(--ok-bg); font-weight: 500; }
+  .tag { display: inline-block; font-size: 0.65rem; padding: 2px 7px; border-radius: 10px; font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase; margin-left: 6px; vertical-align: middle; }
+  .tag.now  { background: #fef3c7; color: #92400e; }
+  .tag.goal { background: #dcfce7; color: #166534; }
+  .tag.pre  { background: #e0f2fe; color: #075985; }
+
+  /* ── LEGEND ── */
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 0.78rem; color: var(--text-muted); margin-bottom: 0.75rem; }
+  .legend-item { display: flex; align-items: center; gap: 5px; }
+  .legend-swatch { width: 10px; height: 10px; border-radius: 2px; display: inline-block; flex-shrink: 0; }
+
+  /* ── FOOTER ── */
+  footer { background: var(--navy-deep); color: rgba(255,255,255,0.4); padding: 2rem; text-align: center; font-size: 0.75rem; line-height: 1.7; }
+  footer strong { color: rgba(255,255,255,0.65); }
+
+  @media (max-width: 600px) {
+    .callout-grid { grid-template-columns: 1fr 1fr; }
+    .masthead-meta { gap: 1.25rem; }
+    nav a { padding: 0.85rem 0.9rem; font-size: 0.72rem; }
+    .budget-row .bar-cell { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="masthead">
+  <div class="cross">✦</div>
+  <h1>Solomon Episcopal Conference Center</h1>
+  <p class="masthead-sub">Financial Overview &nbsp;·&nbsp; Approved 2026 Budget</p>
+  <div class="masthead-meta">
+    <div class="meta-item"><span class="val">44</span><span class="lbl">Guest rooms</span></div>
+    <div class="meta-item"><span class="val">18 yrs</span><span class="lbl">Event history</span></div>
+    <div class="meta-item"><span class="val">3,426</span><span class="lbl">Events completed</span></div>
+    <div class="meta-item"><span class="val">$14.7M</span><span class="lbl">Revenue (est.)</span></div>
+    <div class="meta-item"><span class="val">Loranger, LA</span><span class="lbl">Location</span></div>
+  </div>
+</div>
+
+<nav>
+  <a href="#expenses" class="active">Expenses</a>
+  <a href="#occupancy">Occupancy history</a>
+  <a href="#breakeven">Breakeven</a>
+</nav>
+
+<div class="container">
+
+  <!-- ═══════════════════════════════════════════
+       EXPENSES
+  ════════════════════════════════════════════ -->
+  <section id="expenses">
+    <p class="section-eyebrow">Approved 2026 Budget · Current Operations</p>
+    <h2 class="section-title">Operating expenses</h2>
+    <p class="section-lead">The 2026 budget reflects current operations, including Executive Director compensation. Administrative &amp; General (A&amp;G) staffing is separated from direct labor per standard hospitality accounting practice. Click any category header to expand or collapse its detail.</p>
+
+    <div class="callout-grid">
+      <div class="callout danger">
+        <div class="callout-label">Total budgeted expenses</div>
+        <div class="callout-value red">$1,045,694</div>
+        <div class="callout-note">Direct labor, A&amp;G, facility &amp; operations</div>
+      </div>
+      <div class="callout gold">
+        <div class="callout-label">Total budgeted revenue</div>
+        <div class="callout-value gold-c">$833,000</div>
+        <div class="callout-note">Events, facility usage &amp; donations</div>
+      </div>
+      <div class="callout danger">
+        <div class="callout-label">Projected annual deficit</div>
+        <div class="callout-value red">($212,694)</div>
+        <div class="callout-note">Diocese mission investment required</div>
+      </div>
+      <div class="callout navy">
+        <div class="callout-label">Total staffing (direct + A&amp;G)</div>
+        <div class="callout-value">$672,908</div>
+        <div class="callout-note">64.4% of total expenses</div>
+      </div>
+    </div>
+
+    <!-- REVENUE -->
+    <div class="budget-block">
+      <div class="budget-header revenue open" onclick="toggle(this)">
+        <span class="hd-left"><span class="chevron">▼</span> Revenue</span>
+        <span class="total">$833,000</span>
+      </div>
+      <div class="budget-body open">
+        <div class="budget-row">
+          <span>Event fee revenue</span>
+          <div class="bar-cell"><div class="mini-bar"><div class="mini-bar-fill" style="width:90%;background:#2d6e50;"></div></div><span class="pct-label">90%</span></div>
+          <span class="amount">$753,000</span>
+        </div>
+        <div class="budget-row">
+          <span>Facility usage (pool, pavilion, day use)</span>
+          <div class="bar-cell"><div class="mini-bar"><div class="mini-bar-fill" style="width:5%;background:#2d6e50;"></div></div><span class="pct-label">5%</span></div>
+          <span class="amount">$45,000</span>
+        </div>
+        <div class="budget-row">
+          <span>Donations to SECC</span>
+          <div class="bar-cell"><div class="mini-bar"><div class="mini-bar-fill" style="width:4%;background:#2d6e50;"></div></div><span class="pct-label">4%</span></div>
+          <span class="amount">$35,000</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- DIRECT LABOR -->
+    <div class="budget-block">
+      <div class="budget-header labor open" onclick="toggle(this)">
+        <span class="hd-left"><span class="chevron">▼</span> Direct labor &nbsp;<span style="opacity:0.6;font-size:0.75em;font-weight:400;">Guest Services · Lodging · Dining · Maintenance</span></span>
+        <span class="total">$461,518</span>
+      </div>
+      <div class="budget-body open">
+        <div class="budget-row">
+          <span>Wages &amp; salaries</span>
+          <div class="bar-cell"><div class="mini-bar"><div class="mini-bar-fill" style="width:71%;background:#1a2f4a;"></div></div><span class="pct-label">71%</span></div>
+          <span class="amount">$329,000</span>
+        </div>
+        <div class="budget-row">
+          <span>Employee health insurance</span>
+          <div class="bar-cell"><div class="mini-bar"><div class="mini-bar-fill" style="width:23%;background:#1a2f4a;"></div></div><span class="pct-label">23%</span></div>
+          <span class="amount">$106,440</span>
+        </div>
+        <div class="budget-row">
+          <span>Pension &amp; other benefits</span>
+          <div class="bar-cell"><div class="mini-bar"><div class="mini-bar-fill" style="width:5%;background:#1a2f4a;"></div></div><span class="pct-label">5%</span></div>
+          <span class="amount">$22,578</span>
+        </div>
+        <div class="budget-row">
+          <span>Contracted resources</span>
+          <div class="bar-cell"><div class="mini-bar"><div class="mini-bar-fill" style="width:1%;background:#1a2f4a;"></div></div><span class="pct-label">1%</span></div>
+          <span class="amount">$3,500</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- A&G -->
+    <div class="budget-block">
+      <div class="budget-header ag open" onclick="toggle(this)">
+        <span class="hd-left"><span class="chevron">▼</span> Administrative &amp; General (A&amp;G) &nbsp;<span style="opacity:0.6;font-size:0.75em;font-weight:400;">Undistributed</span></span>
+        <span class="total">$211,390</span>
+      </div>
+      <div class="budget-body open">
+        <div class="budget-row">
+          <span>Administrative salaries &amp; wages</span>
+          <div class="bar-cell"><div class="mini-bar"><div class="mini-bar-fill" style="width:62%;background:#4a3070;"></div></div><span class="pct-label">62%</span></div>
+          <span class="amount">$130,000</span>
+        </div>
+        <div class="budget-row">
+          <span>Administrative health insurance</span>
+          <div class="bar-cell"><div class="mini-bar"><div class="mini-bar-fill" style="width:19%;background:#4a3070;"></div></div><span class="pct-label">19%</span></div>
+          <span class="amount">$39,890</span>
+        </div>
+        <div class="budget-row">
+          <span>Administrative pension &amp; benefits</span>
+          <div class="bar-cell"><div class="mini-bar"><div class="mini-bar-fill" style="width:12%;background:#4a3070;"></div></div><span class="pct-label">12%</span></div>
+          <span class="amount">$25,500</span>
+        </div>
+        <div class="budget-row">
+          <span>Contracted resources (administrative)</span>
+          <div class="bar-cell"><div class="mini-bar"><div class="mini-bar-fill" style="width:8%;background:#4a3070;"></div></div><span class="pct-label">8%</span></div>
+          <span class="amount">$16,000</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- FACILITY -->
+    <div class="budget-block">
+      <div class="budget-header facility" onclick="toggle(this)">
+        <span class="hd-left"><span class="chevron">▼</span> Facility costs</span>
+        <span class="total">$178,400</span>
+      </div>
+      <div class="budget-body">
+        <div class="budget-row">
+          <span>Food costs</span>
+          <div class="bar-cell"><div class="mini-bar"><div class="mini-bar-fill" style="width:35%;background:#8a5520;"></div></div><span class="pct-label">35%</span></div>
+          <span class="amount">$62,000</span>
+        </div>
+        <div class="budget-row">
+          <span>Electricity</span>
+          <div class="bar-cell"><div class="mini-bar"><div class="mini-bar-fill" style="width:34%;background:#8a5520;"></div></div><span class="pct-label">34%</span></div>
+          <span class="amount">$60,000</span>
+        </div>
+        <div class="budget-row">
+          <span>Beverage costs</span>
+          <div class="bar-cell"><div class="mini-bar"><div class="mini-bar-fill" style="width:6%;background:#8a5520;"></div></div><span class="pct-label">6%</span></div>
+          <span class="amount">$11,500</span>
+        </div>
+        <div class="budget-row">
+          <span>Other dining hall expenses</span>
+          <div class="bar-cell"><div class="mini-bar"><div class="mini-bar-fill" style="width:7%;background:#8a5520;"></div></div><span class="pct-label">7%</span></div>
+          <span class="amount">$12,000</span>
+        </div>
+        <div class="budget-row">
+          <span>Repairs &amp; maintenance</span>
+          <div class="bar-cell"><div class="mini-bar"><div class="mini-bar-fill" style="width:6%;background:#8a5520;"></div></div><span class="pct-label">6%</span></div>
+          <span class="amount">$10,500</span>
+        </div>
+        <div class="budget-row">
+          <span>Alarm system</span>
+          <div class="bar-cell"><div class="mini-bar"><div class="mini-bar-fill" style="width:6%;background:#8a5520;"></div></div><span class="pct-label">6%</span></div>
+          <span class="amount">$10,000</span>
+        </div>
+        <div class="budget-row">
+          <span>Equipment, internet &amp; telephone</span>
+          <div class="bar-cell"><div class="mini-bar"><div class="mini-bar-fill" style="width:7%;background:#8a5520;"></div></div><span class="pct-label">7%</span></div>
+          <span class="amount">$12,400</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- OPERATIONS -->
+    <div class="budget-block">
+      <div class="budget-header ops" onclick="toggle(this)">
+        <span class="hd-left"><span class="chevron">▼</span> Operations</span>
+        <span class="total">$194,386</span>
+      </div>
+      <div class="budget-body">
+        <div class="budget-row">
+          <span>Property insurance</span>
+          <div class="bar-cell"><div class="mini-bar"><div class="mini-bar-fill" style="width:39%;background:#4a6b8a;"></div></div><span class="pct-label">39%</span></div>
+          <span class="amount">$76,666</span>
+        </div>
+        <div class="budget-row">
+          <span>Outside services (linen, maintenance contractors)</span>
+          <div class="bar-cell"><div class="mini-bar"><div class="mini-bar-fill" style="width:25%;background:#4a6b8a;"></div></div><span class="pct-label">25%</span></div>
+          <span class="amount">$48,220</span>
+        </div>
+        <div class="budget-row">
+          <span>Workers compensation insurance</span>
+          <div class="bar-cell"><div class="mini-bar"><div class="mini-bar-fill" style="width:7%;background:#4a6b8a;"></div></div><span class="pct-label">7%</span></div>
+          <span class="amount">$13,000</span>
+        </div>
+        <div class="budget-row">
+          <span>Supplies, office, advertising &amp; training</span>
+          <div class="bar-cell"><div class="mini-bar"><div class="mini-bar-fill" style="width:16%;background:#4a6b8a;"></div></div><span class="pct-label">16%</span></div>
+          <span class="amount">$32,000</span>
+        </div>
+        <div class="budget-row">
+          <span>Professional services, auto &amp; merchant fees</span>
+          <div class="bar-cell"><div class="mini-bar"><div class="mini-bar-fill" style="width:8%;background:#4a6b8a;"></div></div><span class="pct-label">8%</span></div>
+          <span class="amount">$15,000</span>
+        </div>
+        <div class="budget-row">
+          <span>Depreciation (non-cash)</span>
+          <div class="bar-cell"><div class="mini-bar"><div class="mini-bar-fill" style="width:5%;background:#4a6b8a;"></div></div><span class="pct-label">5%</span></div>
+          <span class="amount">$9,500</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- NET ROW -->
+    <div class="net-row">
+      <span>Net — projected deficit</span>
+      <span class="amount">($212,694)</span>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       OCCUPANCY
+  ════════════════════════════════════════════ -->
+  <section id="occupancy">
+    <p class="section-eyebrow">18-Year Event History · 44 Rooms</p>
+    <h2 class="section-title">Historical occupancy rates</h2>
+    <p class="section-lead">Occupancy is measured as guest-nights divided by available room-nights (44 rooms × 365 days). Guest counts for events with missing records were estimated using comparable revenue benchmarks. COVID years (2020–2021) reflect restrictions on overnight gatherings.</p>
+
+    <div class="callout-grid">
+      <div class="callout navy">
+        <div class="callout-label">2025 occupancy</div>
+        <div class="callout-value">40.6%</div>
+        <div class="callout-note">6,521 guest-nights</div>
+      </div>
+      <div class="callout navy">
+        <div class="callout-label">Pre-COVID avg (2010–2019)</div>
+        <div class="callout-value">50.3%</div>
+        <div class="callout-note">~8,300 guest-nights / year</div>
+      </div>
+      <div class="callout gold">
+        <div class="callout-label">2025 revenue / guest-night</div>
+        <div class="callout-value gold-c">$144.69</div>
+        <div class="callout-note">Up 54% from $94 in 2010</div>
+      </div>
+      <div class="callout navy">
+        <div class="callout-label">Peak year (2008)</div>
+        <div class="callout-value">65.3%</div>
+        <div class="callout-note">10,481 guest-nights</div>
+      </div>
+    </div>
+
+    <div class="chart-wrap">
+      <div class="chart-title">Annual occupancy rate and total revenue, 2008–2025</div>
+      <div class="legend">
+        <span class="legend-item"><span class="legend-swatch" style="background:#1a2f4a;"></span>Occupancy %</span>
+        <span class="legend-item"><span class="legend-swatch" style="background:#b8973a;"></span>Annual revenue</span>
+        <span class="legend-item"><span class="legend-swatch" style="background:#e8a0a0;border-radius:50%;"></span>COVID period</span>
+      </div>
+      <div class="chart-canvas-wrap" style="height:280px;">
+        <canvas id="occChart" role="img" aria-label="Dual-axis chart showing SECC occupancy rate and revenue 2008 to 2025. Occupancy peaked at 65% in 2008-2010, averaged 50% pre-COVID, and has averaged 40% post-COVID. Revenue has remained near $800K-$1.1M throughout due to improving rates per guest."></canvas>
+      </div>
+    </div>
+
+    <div class="chart-wrap">
+      <div class="chart-title">Revenue per guest-night, 2010–2025</div>
+      <div class="legend">
+        <span class="legend-item" style="color:var(--ok);"><span class="legend-swatch" style="background:var(--ok);"></span>Revenue / guest-night</span>
+      </div>
+      <div class="chart-canvas-wrap" style="height:180px;">
+        <canvas id="rateChart" role="img" aria-label="Line chart showing revenue per guest-night rising from $94 in 2010 to $145 in 2025, a 54% increase."></canvas>
+      </div>
+      <p style="font-size:0.78rem;color:var(--text-muted);margin-top:0.75rem;">Despite a decline in guest volume since 2008, revenue per guest-night has grown 54% — reflecting improved pricing and a higher-value event mix. This rate growth has kept total annual revenue stable near $800K–$1.1M even as occupancy has declined.</p>
+    </div>
+
+    <div class="chart-wrap">
+      <div class="chart-title">Monthly occupancy pattern — 2021–2025 average</div>
+      <div class="legend">
+        <span class="legend-item" style="color:var(--ok);"><span class="legend-swatch" style="background:var(--ok);"></span>Strong (&gt;50%)</span>
+        <span class="legend-item"><span class="legend-swatch" style="background:var(--navy);"></span>Adequate (35–50%)</span>
+        <span class="legend-item" style="color:var(--gold);"><span class="legend-swatch" style="background:var(--gold);"></span>Lean (&lt;35%)</span>
+      </div>
+      <div class="chart-canvas-wrap" style="height:200px;">
+        <canvas id="seasonChart" role="img" aria-label="Monthly bar chart. July peak at 68%, March 59%, October 53%. December lowest at 12%, April 28%, August 33%."></canvas>
+      </div>
+      <p style="font-size:0.78rem;color:var(--text-muted);margin-top:0.75rem;">July is peak season (68%), driven by summer retreats and youth programs. March and October are secondary peaks. December, April, and August are consistently lean — a pattern that creates cash flow challenges even when annual revenue totals are adequate.</p>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       BREAKEVEN
+  ════════════════════════════════════════════ -->
+  <section id="breakeven">
+    <p class="section-eyebrow">Sustainability Analysis</p>
+    <h2 class="section-title">What occupancy does SECC need to break even?</h2>
+    <p class="section-lead">At the current billing rate of $144.69 per guest-night, SECC reaches cash operating breakeven at approximately 41% occupancy — nearly identical to 2025 actual performance. The center is operating at its breakeven threshold. Returning to pre-COVID occupancy levels would generate a meaningful surplus.</p>
+
+    <div class="alert ok">
+      <span class="alert-icon">✓</span>
+      <span><strong>SECC is operating at its breakeven threshold.</strong> The 2025 occupancy rate of 40.6% is essentially equal to the cash breakeven rate of approximately 41%. Returning to the pre-COVID average of 50% would generate approximately $205,000 in annual surplus over current cash operating expenses.</span>
+    </div>
+
+    <div class="alert warn">
+      <span class="alert-icon">→</span>
+      <span><strong>The projected deficit of ($212,694) reflects a revenue shortfall, not a cost crisis.</strong> Cash operating expenses are $1,036,194 (total budget less $9,500 non-cash depreciation). Closing the gap requires growing occupancy modestly above current levels — a realistic target given the historical record.</span>
+    </div>
+
+    <div class="chart-wrap">
+      <div class="chart-title">Projected annual revenue at each occupancy level vs. cash operating expenses</div>
+      <div class="legend">
+        <span class="legend-item"><span class="legend-swatch" style="background:#1a2f4a;opacity:0.5;"></span>Below breakeven</span>
+        <span class="legend-item" style="color:var(--ok);"><span class="legend-swatch" style="background:var(--ok);"></span>At or above breakeven</span>
+      </div>
+      <div class="chart-canvas-wrap" style="height:240px;">
+        <canvas id="beChart" role="img" aria-label="Bar chart of projected revenue at occupancy rates from 30% to 65%. A dashed line marks the cash breakeven threshold of $1,036,194."></canvas>
+      </div>
+    </div>
+
+    <table class="be-table">
+      <thead>
+        <tr>
+          <th>Occupancy rate</th>
+          <th>Guest-nights</th>
+          <th>Est. event revenue</th>
+          <th>Total est. revenue</th>
+          <th>vs. cash expenses</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>30%</td>
+          <td>4,818</td>
+          <td>$696,900</td>
+          <td>$776,900</td>
+          <td style="color:var(--danger);">($259,294)</td>
+        </tr>
+        <tr>
+          <td>35%</td>
+          <td>5,621</td>
+          <td>$813,100</td>
+          <td>$893,100</td>
+          <td style="color:var(--danger);">($143,094)</td>
+        </tr>
+        <tr class="current">
+          <td>40.6% — 2025 actual <span class="tag now">2025</span></td>
+          <td>6,521</td>
+          <td>$943,400</td>
+          <td>$1,023,400</td>
+          <td style="color:var(--danger);">($12,794)</td>
+        </tr>
+        <tr class="breakeven-row">
+          <td>41% — cash breakeven <span class="tag goal">breakeven</span></td>
+          <td>6,585</td>
+          <td>$952,700</td>
+          <td>$1,032,700</td>
+          <td style="color:var(--ok);">~$0</td>
+        </tr>
+        <tr>
+          <td>45%</td>
+          <td>7,227</td>
+          <td>$1,045,400</td>
+          <td>$1,125,400</td>
+          <td style="color:var(--ok);">+$89,206</td>
+        </tr>
+        <tr>
+          <td>50% — pre-COVID avg <span class="tag pre">avg 2010–19</span></td>
+          <td>8,030</td>
+          <td>$1,161,600</td>
+          <td>$1,241,600</td>
+          <td style="color:var(--ok);">+$205,406</td>
+        </tr>
+        <tr>
+          <td>55%</td>
+          <td>8,833</td>
+          <td>$1,277,800</td>
+          <td>$1,357,800</td>
+          <td style="color:var(--ok);">+$321,606</td>
+        </tr>
+        <tr>
+          <td>65% — 2008–2010 peak</td>
+          <td>10,439</td>
+          <td>$1,510,300</td>
+          <td>$1,590,300</td>
+          <td style="color:var(--ok);">+$554,106</td>
+        </tr>
+      </tbody>
+    </table>
+    <p style="font-size:0.75rem;color:var(--text-light);margin-top:0.75rem;">Event revenue projected at $144.69/guest-night (2025 average). Total estimated revenue adds $80,000 in non-event income (facility usage $45,000 + donations $35,000). Cash operating expenses: $1,036,194 (total budget $1,045,694 less $9,500 non-cash depreciation). Guest-nights = 44 rooms × 365 days × occupancy rate.</p>
+  </section>
+
+</div>
+
+<footer>
+  <strong>Solomon Episcopal Conference Center</strong><br>
+  54296 Hwy 445 &nbsp;·&nbsp; Loranger, Louisiana 70446 &nbsp;·&nbsp; seccla.org<br><br>
+  Prepared April 2026 for the Board of Directors and the Episcopal Diocese of Louisiana.<br>
+  Event data sourced from Caterease (2008–2025, 4,713 events). Guest counts estimated where missing using comparable revenue benchmarks.<br>
+  Budget figures from the Board-approved 2026 operating budget, current operations.
+</footer>
+
+<script>
+  /* ── DROPDOWN TOGGLE ── */
+  function toggle(header) {
+    header.classList.toggle('open');
+    const body = header.nextElementSibling;
+    body.classList.toggle('open');
+  }
+
+  /* ── CHARTS ── */
+  const gc = 'rgba(26,47,74,0.07)', tc = '#9b9590';
+  const yrs = [2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025];
+  const occ = [65.3,64.8,64.9,58.5,53.2,47.8,45.9,42.7,42.5,50.5,54.7,42.4,25.8,27.3,41.1,47.2,45.8,40.6];
+  const rev = [978158,979613,979843,873946,826013,769945,787365,725497,767184,816014,973774,962115,470492,618463,886488,1038048,1080274,943520];
+  const bc  = occ.map((_,i) => (yrs[i]===2020||yrs[i]===2021) ? '#e8a0a0' : '#1a2f4a');
+
+  new Chart(document.getElementById('occChart'), {
+    data: {
+      labels: yrs,
+      datasets: [
+        { type:'bar',  label:'Occupancy %', data:occ, backgroundColor:bc, borderRadius:2, yAxisID:'y', order:2 },
+        { type:'line', label:'Revenue', data:rev, borderColor:'#b8973a', backgroundColor:'transparent', pointBackgroundColor:'#b8973a', pointRadius:3, tension:0.3, yAxisID:'y2', order:1 }
+      ]
+    },
+    options: {
+      responsive:true, maintainAspectRatio:false,
+      interaction:{ mode:'index' },
+      plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label: ctx => ctx.datasetIndex===0 ? ' Occupancy: '+ctx.parsed.y.toFixed(1)+'%' : ' Revenue: $'+Math.round(ctx.parsed.y).toLocaleString() } } },
+      scales:{
+        x:{ grid:{color:gc}, ticks:{color:tc, font:{size:11}, autoSkip:false, maxRotation:45} },
+        y:{ position:'left', min:0, max:80, grid:{color:gc}, ticks:{color:tc, font:{size:11}, callback:v=>v+'%'} },
+        y2:{ position:'right', min:0, max:1400000, grid:{display:false}, ticks:{color:'#b8973a', font:{size:11}, callback:v=>'$'+(v/1000).toFixed(0)+'K'} }
+      }
+    }
+  });
+
+  new Chart(document.getElementById('rateChart'), {
+    type:'line',
+    data:{
+      labels:[2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025],
+      datasets:[{ label:'Revenue / guest-night', data:[93.97,93.08,96.70,100.33,106.72,105.85,112.37,100.66,110.81,141.20,113.40,140.82,134.44,136.82,147.02,144.69], borderColor:'#1a5c3a', backgroundColor:'rgba(26,92,58,0.06)', fill:true, tension:0.3, pointRadius:3, pointBackgroundColor:'#1a5c3a' }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label: ctx=>' $'+ctx.parsed.y.toFixed(2)+' / guest-night' } } },
+      scales:{
+        x:{ grid:{color:gc}, ticks:{color:tc, font:{size:11}} },
+        y:{ min:80, max:165, grid:{color:gc}, ticks:{color:tc, font:{size:11}, callback:v=>'$'+v} }
+      }
+    }
+  });
+
+  const mo = [33.7,36.1,58.5,27.7,38.0,35.0,68.4,32.7,42.5,53.1,46.1,12.1];
+  const mc = mo.map(v => v>=50 ? '#1a5c3a' : v>=35 ? '#1a2f4a' : '#b8973a');
+  new Chart(document.getElementById('seasonChart'), {
+    type:'bar',
+    data:{ labels:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'], datasets:[{ label:'Avg occupancy %', data:mo, backgroundColor:mc, borderRadius:2, barPercentage:0.7 }] },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label: ctx=>' '+ctx.parsed.y.toFixed(1)+'% avg occupancy' } } },
+      scales:{
+        x:{ grid:{display:false}, ticks:{color:tc, font:{size:11}, autoSkip:false} },
+        y:{ min:0, max:80, grid:{color:gc}, ticks:{color:tc, font:{size:11}, callback:v=>v+'%'} }
+      }
+    }
+  });
+
+  const beO = [30,35,41,45,50,55,65];
+  const beR = beO.map(o => Math.round(44*365*(o/100)*144.69));
+  const beC = beO.map(o => o<41 ? '#1a2f4a88' : '#1a5c3a');
+  new Chart(document.getElementById('beChart'), {
+    type:'bar',
+    data:{ labels:beO.map(o=>o+'%'), datasets:[{ label:'Projected revenue', data:beR, backgroundColor:beC, borderRadius:2, barPercentage:0.65 }] },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label: ctx=>' $'+Math.round(ctx.parsed.y).toLocaleString()+' total revenue (est.)' } } },
+      scales:{
+        x:{ grid:{display:false}, ticks:{color:tc, font:{size:12}, autoSkip:false} },
+        y:{ min:0, max:1700000, grid:{color:gc}, ticks:{color:tc, font:{size:11}, callback:v=>'$'+(v/1000).toFixed(0)+'K'} }
+      }
+    },
+    plugins:[{ id:'thr', afterDraw(chart) {
+      const { ctx, chartArea:{left,right}, scales:{y} } = chart;
+      const yp = y.getPixelForValue(1036194);
+      ctx.save();
+      ctx.strokeStyle='#9b2c2c'; ctx.lineWidth=1.5; ctx.setLineDash([6,3]);
+      ctx.beginPath(); ctx.moveTo(left,yp); ctx.lineTo(right,yp); ctx.stroke();
+      ctx.fillStyle='#9b2c2c'; ctx.font='500 11px DM Sans,sans-serif';
+      ctx.fillText('Cash breakeven — $1,036,194', left+4, yp-5);
+      ctx.restore();
+    }}]
+  });
+
+  /* ── STICKY NAV ── */
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
+        const a = document.querySelector('nav a[href="#'+e.target.id+'"]');
+        if (a) a.classList.add('active');
+      }
+    });
+  }, { rootMargin:'-40% 0px -55% 0px' });
+  document.querySelectorAll('section[id]').forEach(s => obs.observe(s));
+</script>
+</body>
+</html>
